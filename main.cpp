@@ -3,13 +3,13 @@
 //因为CGCS2000坐标系与WGS84坐标系的原点、尺度、定向及定向演变的定义都是相同的，参考椭球的参数略有不同而已。
 //相同的坐标点，在CGCS2000与WGS84下，经度是相同的，只在纬度上存有0.11mm上下的区别，可以忽略掉...
 //
-
 #include <iostream>
 #include <vector>
 #include <string>
 #include <sstream>
 #include <iomanip>
 #include <cmath>
+#include <fstream>
 #include "CoordTransform.h"
 
 // 用于存储坐标的结构体
@@ -21,7 +21,18 @@ struct Coordinate {
 // 打印坐标
 void printCoordinate(const std::string& label, const Coordinate& coord) {
     std::cout << std::fixed << std::setprecision(6);
-    std::cout << label << ": (" << coord.lng << ", " << coord.lat << ")" << std::endl;
+    //std::cout << label << ": (" << coord.lng << ", " << coord.lat << ")" << std::endl;
+    std::cout << coord.lng << " " << coord.lat << std::endl;
+
+    std::ofstream newtxt("coordinates.txt", std::ios::app); 
+    if (newtxt.is_open()) {
+        newtxt << std::fixed << std::setprecision(6);
+        newtxt << coord.lng << "    " << coord.lat << std::endl;
+        newtxt.close(); // 确保在写入后关闭文件
+    }
+    else {
+        std::cerr << "无法打开文件!" << std::endl;
+    }
 }
 
 // 从输入字符串解析坐标
@@ -38,6 +49,11 @@ int main() {
     CoordTransform::CoordTransform ct;
     std::vector<Coordinate> coordinates;
     std::string line;
+
+    // 删除旧的 coordinates.txt 文件
+    if (std::remove("coordinates.txt") != 0) {
+        std::cerr << "无法删除旧的文件. 可能文件不存在或权限不足." << std::endl;
+    }
 
     // 动态输入坐标
     std::cout << "请输入经纬度 (经度 纬度), 每行一组，经纬度之间用空格隔开. 输入回车时结束输入并介绍:" << std::endl;
@@ -105,5 +121,6 @@ int main() {
         }
     }
 
+    system("pause");
     return 0;
 }
